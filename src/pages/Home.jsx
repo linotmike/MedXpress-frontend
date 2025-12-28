@@ -1,10 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-import { Clock, MapPin, Shield, Zap } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Clock, MapPin, Shield, Zap, Package, Pill, TrendingUp, Truck } from "lucide-react";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { useAuth } from "@/auth/AuthContext";
+import { ROLES } from "@/auth/roles";
 
 export default function Home() {
+  const { auth } = useAuth();
+  const navigate = useNavigate();
+  const isPatient = auth.user?.role === ROLES.PATIENT;
+  const isRider = auth.user?.role === ROLES.RIDER;
+  const isAdmin = auth.user?.role === ROLES.PHARMACY_ADMIN;
+  const isAuthenticated = auth.isAuthenticated;
+
+  // Categories for patients
+  const patientCategories = [
+    { name: "Pharmacies", icon: "🏪", href: "/pharmacies" },
+    { name: "Medicines", icon: "💊", href: "/medicines" },
+    { name: "My Orders", icon: "📦", href: "/orders" },
+    { name: "Wellness", icon: "🧘", action: () => {} },
+    { name: "Health Deals", icon: "💰", action: () => {} },
+    { name: "Essentials", icon: "✨", action: () => {} },
+  ];
+
   const features = [
     {
       icon: <Zap className="w-6 h-6" />,
@@ -41,7 +60,209 @@ export default function Home() {
 
   return (
     <div className="space-y-12">
-      {/* Hero Section */}
+      {/* Patient Dashboard */}
+      {isAuthenticated && isPatient && (
+        <>
+          {/* Welcome Section */}
+          <section className="pt-6 pb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Welcome, {auth.user?.name?.split(" ")[0]}! 👋
+                </h1>
+                <p className="text-gray-600">Order medicines from nearby pharmacies</p>
+              </div>
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-bold">
+                {auth.user?.name?.[0]?.toUpperCase() || "U"}
+              </div>
+            </div>
+
+            {/* Quick Search */}
+            <Card className="rounded-2xl shadow-sm border-gray-200">
+              <CardContent className="p-6">
+                <div className="flex gap-3">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder="Search medicines, pharmacies..."
+                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <Button className="rounded-xl bg-blue-500 hover:bg-blue-600 text-white px-6">
+                    Search
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Categories Grid */}
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Shop Categories</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {patientCategories.map((category, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => category.href && navigate(category.href)}
+                  className="group bg-white rounded-2xl p-4 border border-gray-200 hover:border-blue-500 hover:shadow-md transition-all"
+                >
+                  <div className="text-4xl mb-2">{category.icon}</div>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-500 transition">{category.name}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Quick Links */}
+          <section className="grid md:grid-cols-3 gap-6">
+            <Card className="rounded-2xl shadow-sm border-gray-200 hover:shadow-md transition">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <Package className="w-8 h-8 text-blue-500" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">My Orders</h3>
+                <p className="text-sm text-gray-600 mb-4">Track your medicine orders</p>
+                <Button asChild variant="ghost" className="text-blue-500 hover:text-blue-600 p-0">
+                  <Link to="/orders">View Orders →</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl shadow-sm border-gray-200 hover:shadow-md transition">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <MapPin className="w-8 h-8 text-green-500" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Find Pharmacies</h3>
+                <p className="text-sm text-gray-600 mb-4">Browse nearby pharmacies</p>
+                <Button asChild variant="ghost" className="text-green-600 hover:text-green-700 p-0">
+                  <Link to="/pharmacies">Find Now →</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl shadow-sm border-gray-200 hover:shadow-md transition">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <Pill className="w-8 h-8 text-purple-500" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Browse Medicines</h3>
+                <p className="text-sm text-gray-600 mb-4">Search our medicine catalog</p>
+                <Button asChild variant="ghost" className="text-purple-600 hover:text-purple-700 p-0">
+                  <Link to="/medicines">Browse →</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+        </>
+      )}
+
+      {/* Rider Dashboard */}
+      {isAuthenticated && isRider && (
+        <>
+          <section className="pt-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Welcome back, {auth.user?.name?.split(" ")[0]}! 🚴
+                </h1>
+                <p className="text-gray-600">Manage your deliveries</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <Truck className="w-8 h-8 text-blue-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">My Deliveries</h3>
+                  <p className="text-sm text-gray-600 mb-4">View and manage your deliveries</p>
+                  <Button asChild className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white w-full">
+                    <Link to="/rider/deliveries">Go to Deliveries</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <TrendingUp className="w-8 h-8 text-green-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Earnings</h3>
+                  <p className="text-sm text-gray-600 mb-4">Track your delivery earnings</p>
+                  <Button variant="outline" className="rounded-lg border-gray-300 w-full">
+                    Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <Clock className="w-8 h-8 text-yellow-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Statistics</h3>
+                  <p className="text-sm text-gray-600 mb-4">View your performance stats</p>
+                  <Button variant="outline" className="rounded-lg border-gray-300 w-full">
+                    Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Pharmacy Admin Dashboard */}
+      {isAuthenticated && isAdmin && (
+        <>
+          <section className="pt-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Pharmacy Admin Dashboard
+                </h1>
+                <p className="text-gray-600">Manage your pharmacy inventory and operations</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <Pill className="w-8 h-8 text-blue-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Manage Medicines</h3>
+                  <p className="text-sm text-gray-600 mb-4">Add and manage your medicine inventory</p>
+                  <Button asChild className="rounded-lg bg-blue-500 hover:bg-blue-600 text-white w-full">
+                    <Link to="/medicines">Go to Medicines</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <Package className="w-8 h-8 text-green-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Orders</h3>
+                  <p className="text-sm text-gray-600 mb-4">View and manage orders</p>
+                  <Button variant="outline" className="rounded-lg border-gray-300 w-full">
+                    Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl shadow-sm border-gray-200">
+                <CardContent className="p-6">
+                  <TrendingUp className="w-8 h-8 text-purple-500 mb-4" />
+                  <h3 className="font-semibold text-gray-900 mb-2">Analytics</h3>
+                  <p className="text-sm text-gray-600 mb-4">View pharmacy analytics</p>
+                  <Button variant="outline" className="rounded-lg border-gray-300 w-full">
+                    Coming Soon
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+        </>
+      )}
+
+      {/* Unauthenticated Landing Page */}
+      {!isAuthenticated && (
+        <>
+          {/* Hero Section */}
       <section className="pt-12 pb-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
@@ -120,22 +341,30 @@ export default function Home() {
           </div>
         </div>
       </section>
+        </>
+      )}
 
-      {/* Ethiopia Coverage Map */}
+      {/* Ethiopia Coverage Map - Visible to all */}
       <section className="py-12">
         <h2 className="text-4xl font-bold text-gray-900 mb-4 text-center">Our Coverage Across Ethiopia</h2>
         <p className="text-xl text-gray-600 text-center mb-8">Serving pharmacies nationwide with reliable delivery services</p>
         
-        <Card className="bg-white border-gray-200 overflow-hidden">
+        <Card className="bg-white border-gray-200 overflow-hidden rounded-2xl">
           <CardContent className="p-0">
             <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyDummy"}>
               <GoogleMap
-                mapContainerStyle={mapContainerStyle}
-                center={ethiopiaMapCenter}
+                mapContainerStyle={{
+                  width: "100%",
+                  height: "400px",
+                  borderRadius: "1.5rem"
+                }}
+                center={{
+                  lat: 9.145,
+                  lng: 40.4897
+                }}
                 zoom={6}
               >
-                {/* Center marker for Addis Ababa */}
-                <Marker position={ethiopiaMapCenter} title="Addis Ababa" />
+                <Marker position={{ lat: 9.145, lng: 40.4897 }} title="Addis Ababa" />
               </GoogleMap>
             </LoadScript>
           </CardContent>

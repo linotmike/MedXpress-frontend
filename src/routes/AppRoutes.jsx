@@ -8,6 +8,9 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Unauthorized from "../pages/Unauthorized";
 import RequireAuth from "../auth/RequireAuth";
+import Medicines from "../pages/Medicines";
+import RiderDeliveries from "../pages/RiderDeliveries";
+import DeliveryDetails from "../pages/DeliveryDetails";
 import { ROLES } from "../auth/roles";
 
 export default function AppRoutes() {
@@ -27,12 +30,14 @@ export default function AppRoutes() {
         <Route path="/orders" element={<Orders />} />
       </Route>
 
-      {/* Example role-protected routes (we’ll add pages later) */}
+{/* Rider */}
       <Route element={<RequireAuth allowedRoles={[ROLES.RIDER]} />}>
-        {/* later: /rider/deliveries */}
+        <Route path="/rider/deliveries" element={<RiderDeliveries />} />
+        <Route path="/rider/deliveries/:deliveryId" element={<DeliveryDetails />} />
       </Route>
 
       <Route element={<RequireAuth allowedRoles={[ROLES.PHARMACY_ADMIN]} />}>
+        <Route path="/medicines" element={<Medicines />} />
         {/* later: /pharmacy/dashboard */}
       </Route>
 

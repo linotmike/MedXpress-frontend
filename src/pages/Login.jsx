@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "../auth/AuthContext";
 import { ROLES } from "../auth/roles";
+import { authApi } from "../api/authApi";
 import { Eye, EyeOff, Lock, Mail, Chrome, Apple } from "lucide-react";
 
 export default function Login() {
-  const { loginDev } = useAuth();
+  const {login } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -31,22 +32,30 @@ export default function Login() {
     // TODO: Implement Apple OAuth
   };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!canSubmit || submitting) return;
+const onSubmit = async (e) => {
+  e.preventDefault();
+  if (!canSubmit || submitting) return;
 
-    setSubmitting(true);
+  setSubmitting(true);
 
-    try {
-      // Dev mode login (swap with backend later)
-      loginDev(ROLES.PATIENT);
+  try {
+    const res = await authApi.login(email, password);
 
-      toast.success("Welcome back");
-      setTimeout(() => navigate("/pharmacies"), 200);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    // store token
+    localStorage.setItem("mx_token", res.token);
+
+    // update auth context with user data
+    const userData = res.user || res.data?.user || {};
+    login(userData);
+
+    toast.success("Welcome back");
+    navigate("/pharmacies");
+  } catch (err) {
+    toast.error(err?.message || "Login failed");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-[calc(100vh-180px)] grid place-items-center px-4 py-8">
@@ -64,14 +73,14 @@ export default function Login() {
             <form className="space-y-5" onSubmit={onSubmit}>
               {/* Email */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-900">Email Address</label>
+                <label className="text-sm font-semibold text-gray-900">Email Address or Phone Number</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
                   <Input
                     className="pl-12 h-12 rounded-lg border-gray-300 text-gray-900 placeholder-gray-500"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
+                    placeholder="you@example.com or 1234567890"
                     autoComplete="email"
                   />
                 </div>

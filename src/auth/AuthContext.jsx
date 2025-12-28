@@ -37,6 +37,12 @@ export function AuthProvider({ children }) {
           user: { id: "dev-user", name: "Dev User", role },
         });
       },
+      login(user) {
+        setAuth({
+          isAuthenticated: true,
+          user,
+        });
+      },
       logout() {
         setAuth(defaultAuth);
       },

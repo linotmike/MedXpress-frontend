@@ -44,7 +44,7 @@ function RolePill({ role }) {
 }
 
 export default function AppShell({ children }) {
-  const { auth, logout, setRole } = useAuth();
+  const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const role = auth.user?.role;
 
@@ -125,22 +125,6 @@ export default function AppShell({ children }) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
-                    {/* Role Switching */}
-                    <DropdownMenuLabel className="text-xs text-gray-500 font-semibold">
-                      Switch Role
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => setRole(ROLES.PATIENT)}>
-                      Patient
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole(ROLES.PHARMACY_ADMIN)}>
-                      Pharmacy Admin
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setRole(ROLES.RIDER)}>
-                      Rider
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
                     <DropdownMenuItem
                       onClick={() => {
                         logout();
@@ -168,6 +152,17 @@ export default function AppShell({ children }) {
                 <ShoppingBag className="w-4 h-4 mr-1" />
                 Orders
               </NavLink>
+               {role === ROLES.PHARMACY_ADMIN && (
+              <NavLink to="/medicines" className={navLinkClass}>
+                 Medicines
+              </NavLink>
+                )}
+
+              {role === ROLES.RIDER && (
+              <NavLink to="/rider/deliveries" className={navLinkClass}>
+                Deliveries
+              </NavLink>
+              )}
             </nav>
           )}
         </div>
